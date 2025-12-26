@@ -1,0 +1,57 @@
+# 과제 1
+select order_status, 
+	   count(distinct order_id) as orders, 
+	   count(*) as item_rows, 
+	   round(count(*)/count(distinct order_id),2) as avg_items_per_order
+from basic.order_items 
+group by order_status 
+having count(*) >= 10
+order by 2 desc;
+
+
+# 과제 2
+select channel, 
+	   count(distinct order_id) as total_orders, 
+       count(distinct case when order_status <> 'cancelled' then NULL else order_id end) 
+       	as cancelled_orders,
+       count(distinct case when order_status <> 'refunded' then null else order_id end) 
+       	as refunded_orders,
+       count(distinct case when order_status = 'refunded' then order_id when order_status = 'cancelled' then order_id else null end) 
+       	as cancel_or_refund_orders,
+       round(count(distinct case when order_status = 'cancelled' then order_id when order_status = 'refunded' then order_id else null end)/count(distinct order_id)*100,1) 	
+       	as cancel_or_refund_rate_pct
+from basic.order_items
+group by channel
+having count(distinct order_id) >= 20
+order by 6 desc, 1 asc;
+
+
+select *
+from basic.order_items
+
+# 과제 3
+select region,
+       count(distinct order_id) as total_orders,
+       count(distinct case when coupon_code is not null then order_id else null end) as coupon_orders,
+       round(count(distinct case when coupon_code is not null then order_id else null end)/count(distinct order_id)*100,1) as coupon_order_pct,
+       count(distinct case when coupon_code is null then order_id else null end) as no_coupon_orders,
+       count(distinct case when delivery_type = 'pickup' then order_id else null end) as pickup_orders
+from basic.order_items 
+group by region
+having count(distinct case when coupon_code is not null then order_id else null end) >= 5
+order by coupon_order_pct desc, coupon_orders desc;
+
+
+# 과제 4
+select product_category,
+	   count(*) as completed_items,
+	   round(sum(unit_price*quantity*(1-discount_rate)),0) as net_sales,
+	   sum(is_returned) as returned_items,
+	   round(sum(is_returned)/count(*)*100,1) as return_rate_pct,
+	   count(review_score) as review_cnt,
+	   round(count(review_score)/count(*)*100,1) as review_rate_pct
+from basic.order_items
+where order_status = 'completed'
+group by product_category
+having count(*) >= 15
+order by net_sales desc;
