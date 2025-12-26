@@ -1,0 +1,38 @@
+# 과제 1
+select logid, log_date, game_account_id, device, referrer
+from basic.game_logs gl 
+where action_type = 'login' and country = 'KR'
+order by logid 
+limit 20;
+
+# 과제 2
+select logid, log_date, game_account_id, item_name, item_qty
+from basic.game_logs 
+where action_type = 'item_gain' and item_qty >= 10
+order by item_qty desc, log_date desc
+limit 30;
+
+# 과제 3
+select 
+	logid,
+	game_account_id,
+	country,
+	item_name,
+	item_qty,
+	case
+		when referrer is null then 'unknown'
+		else referrer
+	end as referrer_group
+from basic.game_logs 
+where action_type = 'purchase' and country in ('KR', 'JP')
+order by log_date desc, logid desc
+limit 50;
+
+
+# 과제 4
+select logid, log_date, game_account_id, action_type, party_id, party_members
+from basic.game_logs
+where party_id is not null 
+	and action_type in ('quest_complete', 'item_gain')
+order by party_members desc, logid asc
+limit 30;
