@@ -1,0 +1,97 @@
+# 미니 실습 3 (다중 조인)
+select 
+	c.course_id,
+	c.course_name,
+	count(distinct e.enrollment_id) as enroll_cnt,
+	sum(p.amount) as paid_revenue,
+	count(p.payment_id) as paid_payment_rows
+from basic.courses c
+left join basic.enrollments e
+on c.course_id = e.course_id
+left join basic.payments p
+on e.enrollment_id = p.enrollment_id
+and p.payment_status = 'paid'
+where c.is_active = 1
+group by c.course_id, c.course_name
+order by paid_revenue desc, course_name asc
+
+
+# 데일리 과제 
+# 과제 1 : 전체 사람 목록(학생+강사) 만들기
+select 
+	'student' as person_type,
+	s.student_id as person_id,
+	s.student_name as person_name
+from basic.students s
+union all # 이름이 같은 사람이 있을 수도 있으니 중복 허용
+select
+	'instructor',
+	i.instructor_id,
+	i.instructor_name
+from basic.instructors i
+order by person_type asc, person_id asc;
+
+
+# 과제 2 : 카테고리별 진행중(active) 신청 현황 확인하기
+select
+	c.category,
+	count(*) as active_enrollments,
+	count(distinct e.student_id) as unique_students,
+	round(avg(e.final_price), 0) as avg_final_price
+from basic.enrollments e
+inner join basic.courses c
+on e.course_id = c.course_id
+where e.enrollment_status = 'active'
+group by c.category
+having active_enrollments >= 2
+order by active_enrollments desc, category asc;
+
+
+# 과제 3 : 결제 성공(paid) 기록이 없는 신청 찾기
+select 
+	e.enrollment_id,
+	e.student_id,
+	e.course_id,
+	e.enroll_date,
+	e.enrollment_status,
+	e.final_price
+from basic.enrollments e
+left join basic.payments p
+on e.enrollment_id = p.enrollment_id
+and p.payment_status = 'paid'
+where p.payment_id is null
+and e.enrollment_status <> 'cancelled'
+order by e.enroll_date asc, e.enrollment_id asc;
+
+
+# 과제 4 : 강좌별 신청수 + 결제매출 리포트
+select 
+	c.course_id,
+	c.course_name,
+	# 신청 건수
+	count(distinct e.enrollment_id) as enroll_cnt,
+	# 결제 성공 이력이 있는 신청 건수
+	count(distinct p.enrollment_id) as paid_enroll_cnt,
+	# 결제 성공 결제 이벤트 수
+	count(p.payment_id) as paid_payment_rows,
+	# 결제 성공 금액 합
+	sum(p.amount) as paid_revenue,
+	round(count(distinct p.enrollment_id) / count(distinct e.enrollment_id) * 100, 1)
+		as paid_enroll_rate_pct
+from basic.courses c
+left join basic.enrollments e
+on c.course_id = e.course_id
+left join basic.payments p
+on e.enrollment_id = p.enrollment_id
+and p.payment_status = 'paid'
+where c.is_active = 1
+group by c.course_id, c.course_name
+having count(distinct e.enrollment_id) >= 1
+order by paid_revenue desc, c.course_name asc;
+
+# 데일리 퀴즈
+# Q1. B
+# Q2. C
+# Q3. C
+# Q4. B
+# Q5. B
