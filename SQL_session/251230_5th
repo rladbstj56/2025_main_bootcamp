@@ -1,0 +1,108 @@
+# https://www.notion.so/teamsparta/SQL-_5-2d22dc3ef5148023af7bcedbcf7d0574#2d82dc3ef514800e8fb3fdb03dcf38fc
+
+## 25-12-30 
+# 5회차 세션
+
+# 과제 1
+select
+	enrollment_id, student_id, final_price,
+	case when coupon_code is null then 'no_coupon' 
+	else 'coupon_used' end as coupon_flag, 
+	case when final_price < 50000 then 'low' 
+		 when final_price < 90000 then 'mid' 
+		 else 'high' end as price_bucket 
+from basic.enrollments 
+where enrollment_status in ('active','completed')
+order by enrollment_id;
+
+
+
+# 과제 2
+# first try
+select
+	s.student_id, s.student_name
+from basic.students s
+where exists 
+(
+select  *
+from basic.enrollments e
+where e.course_id in
+( 	select course_id 
+	from basic.courses 
+	where category = 'sql') # sql 수업
+and enrollment_status <> 'cancelled'
+and e.student_id = s.student_id
+) # 상태가 cancelled이 아닌 신청만
+order by s.student_id 
+
+# second try
+select student_id, student_name 
+from basic.students 
+where student_id in (
+	select student_id 
+	from basic.enrollments 
+	where enrollment_status <> 'cancelled'
+	and course_id in ( 
+		select course_id 
+		from basic.courses 
+		where category = 'sql'
+	)	
+)
+	
+	
+	
+# 과제 3
+select s.student_id, s.student_name 
+from basic.students s 
+where not exists
+(	select *
+	from basic.enrollments e
+	where coupon_code is not null 
+	and s.student_id = e.student_id
+) # 한번이라도 사용한 학생들
+order by s.student_id
+
+
+# 과제 4
+with 
+stu_enroll as (
+	select 
+		student_id,
+		count(*) as enroll_cnt
+	from basic.enrollments 
+	where enrollment_status <> 'cancelled'
+	group by student_id 
+), 
+stu_coupon as ( 
+	select 
+		student_id, 
+		count(coupon_code) as coupon_cnt 
+	from basic.enrollments 
+	where enrollment_status <> 'cancelled'
+	group by student_id 
+) 
+select 
+	s.student_id,  
+	s.student_name, 
+	ifnull(se.enroll_cnt,0) as enroll_cnt,  
+	ifnull(sc.coupon_cnt,0) as coupon_used_cnt, 
+	case when ifnull(se.enroll_cnt,0) = 0 then 'no_enroll' 
+		else 'has_enroll' end as enroll_flag, 
+	case when ifnull(sc.coupon_cnt,0) = 0 then 'no_coupon_user'
+		else 'coupon_user' end as coupon_user_flag, 
+	case when ifnull(sc.coupon_cnt,0) = 0 then 0 
+		else round(ifnull(sc.coupon_cnt,0) / ifnull(se.enroll_cnt,0) * 100,1) 
+		end as coupon_usage_rate_pct
+from basic.students s 
+left join stu_enroll se 
+on s.student_id = se.student_id 
+left join stu_coupon sc 
+on s.student_id = sc.student_id 
+order by s.student_id
+
+
+# Q1. B 
+# Q2. C
+# Q3. B
+# Q4. B 
+# Q5. C
