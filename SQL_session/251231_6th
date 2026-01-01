@@ -1,0 +1,70 @@
+# 링크: https://www.notion.so/SQL-6-2d816981183880d9a48ad72f76077cc1
+
+## 2025-12-31
+## 6회차 세션
+
+# 과제 1
+select
+	e.enrollment_id, 
+	e.student_id, 
+	s.student_name,  
+	coalesce(s.region, 'UNKNOWN') as region_clean, 
+	ifnull(e.coupon_code, 'no_coupon') as coupon_label
+from basic.enrollments e 
+left join basic.students s 
+on e.student_id = s.student_id
+where e.enrollment_status in ('active','completed')
+order by e.enrollment_id;
+
+
+# 과제 2 
+select 
+	enrollment_id, 
+	student_id, 
+	final_price, 
+	count(*) over (partition by student_id) as student_enroll_cnt, 
+	sum(final_price) over (partition by student_id) as student_total_spend, 
+	avg(final_price) over (partition by student_id) as student_avg_price 
+from basic.enrollments 
+order by student_id, enrollment_id;
+
+
+# 과제 3 
+with ranked as ( 
+select 
+	student_id, 
+	enrollment_id, 
+	final_price,
+	row_number() over (partition by student_id 
+		order by final_price desc, enrollment_id asc) as rnk 
+from basic.enrollments 
+where enrollment_status in ('active', 'completed')
+) 
+select student_id, enrollment_id, final_price
+from ranked 
+where rnk = 1
+order by student_id;
+
+
+
+# 과제 4 
+select 
+	payment_id, 
+	paid_at, 
+	amount, 
+	lag(amount,1,0) over (order by paid_at, payment_id) as prev_amount, 
+	amount - lag(amount,1,0) over (order by paid_at, payment_id) as diff_from_prev, 
+	sum(amount) over (order by paid_at, payment_id
+		rows between unbounded preceding and current row
+	) as cum_amount 
+from basic.payments 
+where payment_status = 'paid'
+order by paid_at, payment_id 
+	
+
+# 데일리 퀴즈
+# Q1. C 
+# Q2. B 
+# Q3. C 
+# Q4. B 
+# Q5. C
