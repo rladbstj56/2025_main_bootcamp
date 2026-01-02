@@ -1,0 +1,130 @@
+# 문제 링크: https://www.notion.so/teamsparta/SQL-2db2dc3ef514802c8af3fbe1060f4654?source=copy_link
+
+select * from test.books -- book_id, title, category, list_price, published_date, is_active
+-- order_items 랑 bood_id
+
+select * from test.customers -- customer_id, customer_name, signup_date, region, segment
+-- orders 랑 customer_id
+
+select * from test.order_items -- order_item_id, order_id, book_id, unit_price, quantity, discount_rate, is_returned, review_score
+-- orders 랑 order_id, 
+-- books 랑 book_id
+
+select * from test.orders -- order_id, order_date, customer_id, ship_region, channel, order_status, coupon_code, delivery_type, delivery_days
+-- customers 랑 customer_id (FK),
+-- payments 랑 order_id (PK)
+
+select * from test.payments -- payment_id, order_id, paid_at, amount, payment_method, payment_status
+-- orders 랑 order_id (FK)
+
+
+# Q1. C 
+# Q2. A 
+# Q3. D 
+# Q4. B 
+# Q5. C 
+# Q6. D 
+# Q7. A 
+# Q8. B 
+# Q9. D 
+# Q10. C 
+ 
+# Q11.
+
+select  
+	order_id,  
+	order_date, 
+	channel, 
+	order_status, 
+	case 
+		when coupon_code is null then 'no_coupon' 
+		else 'coupon_used' 
+		end as coupon_flag, 
+	ifnull(delivery_days,0) as delivery_days_clean
+from test.orders 
+where order_date between '2026-01-05' and '2026-01-15' 
+order by order_date asc, order_id asc;
+	
+	
+# Q12. 
+
+select 
+	o.ship_region, 
+	count(distinct o.order_id) as order_cnt, 
+	count(distinct o.customer_id) as customer_cnt, 
+	sum(oi.unit_price * oi.quantity * (1 - oi.discount_rate)) 
+		as net_revenue
+from test.orders o 
+left join test.order_items oi
+on o.order_id = oi.order_id
+where order_status = 'completed'
+group by o.ship_region
+having count(distinct o.order_id) >= 2
+order by net_revenue desc, ship_region asc;
+
+
+# Q13. 
+
+select 
+	o.order_id,
+	o.order_status, 
+	o.order_date, 
+	p.payment_id, 
+	p.paid_at, 
+	p.amount
+from test.orders o 
+left join test.payments p 
+on o.order_id = p.order_id 
+and p.payment_status = 'paid'
+where o.order_date between '2026-01-05' and '2026-01-31' 
+order by o.order_date, o.order_id, p.paid_at 
+
+
+# Q14. 
+
+select 
+	c.customer_id, c.customer_name, c.segment
+from test.customers c
+where c.customer_id in (
+	select o.customer_id 
+	from test.orders o 
+	where o.order_status = 'completed'
+	and o.order_id in (
+		select oi.order_id 
+		from test.order_items oi
+		where oi.book_id in (
+			select b.book_id 
+			from test.books b 
+			where b.category = 'sql'
+		)
+	)
+)
+order by customer_id asc;
+
+
+select 
+	c.customer_id, 
+	c.customer_name, 
+	c.segment
+from test.customers c 
+where exists ( 
+	select 1
+	from test.orders o 
+	join test.order_items oi 
+		on o.order_id = oi.order_id 
+	join test.books b 
+		on b.book_id = oi.book_id 
+	where o.customer_id = c.customer_id 
+		and b.category = 'sql' 
+		and o.order_status = 'completed'
+)
+order by c.customer_id;
+
+# Q15. 
+
+select 
+	order_id, customer_id, order_date, order_status, 
+	count(*) over (partition by customer_id)
+		as customer_order_cnt 
+from test.orders o
+order by customer_id, order_date, order_id;
