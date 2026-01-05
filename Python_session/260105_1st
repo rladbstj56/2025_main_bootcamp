@@ -1,0 +1,78 @@
+# 01 입출력
+# 미니 프로젝트: "안전한 계산기" 만들기
+
+s = input("두 수를 입력하세요 (예: 10 3 / 10,3 / 10#3): ")
+
+# TODO: 구분자 선택
+# TODO: 숫자 변환(필요하면 strip, replace 등)
+cleaned = s.replace(',',' ').replace('#',' ').split()
+print(cleaned)
+# TODO: 합/차/곱/나눗셈 출력
+try: 
+  num = list(map(int, [p.strip() for p in cleaned])) 
+  print("addition = ", num[0]+num[1])
+  print("subtraction = ", num[0]-num[1])
+  print("multiplication = ", num[0]*num[1])
+  print("division = ", num[0]/num[1]) 
+# TODO: ValueError, ZeroDivisionError 처리
+except ValueError: 
+  print("입력 형식이 잘못되었습니다.") 
+except ZeroDivisionError: 
+  print("0으로는 나눌 수 없습니다!")
+
+
+
+
+# 02 변수 
+# 미니 프로젝트: "용돈 계산기" (변수 총정리)
+
+# TODO: 값은 자유롭게 바꿔도 됩니다.
+allowance = 50000
+snack = 12000
+transport = 15000
+game = 8000
+
+# TODO 1: 총 지출 계산
+total_spent = snack + transport + game
+
+# TODO 2: 남은 돈 계산
+remaining = allowance - total_spent
+
+# TODO 3: 출력 + 조건 처리
+print(f"남은 돈은 {int(remaining)}원 입니다.")
+
+
+
+
+# 03 문자열 
+# 미니 프로젝트: "문장 정리기" 만들기
+
+text = input("문장을 입력하세요: ")
+
+# TODO 1: 공백 제거
+cleaned = text.strip()
+# TODO 2: 소문자 변환
+lower = cleaned.lower()
+# TODO 3: 쉼표를 공백으로 바꾸기
+blank = lower.replace(',',' ')
+# TODO 4: 단어 리스트 만들기(split) + 단어 개수 출력
+words = blank.split() 
+print(len(words))
+# TODO 5: python 포함 여부 출력
+w = 'python' 
+try: 
+  pos = words.index(w)
+  print("위치: ",pos)
+except ValueError:
+  print("index: 찾지 못했습니다!")
+# GEMINI 추천: 특정 단어 포함되어있는지 확인
+if w in words: 
+  print(f"{w}가 리스트에 포함되어있습니다.")
+
+
+# GEMINI 추천: 메서드 체이닝 (Method Chaining) 
+text = input("문장을 입력하세요: ").strip().lower().replace(',', ' ')
+words = text.split()
+
+print(f"단어 개수: {len(words)}")
+print(f"python 포함 여부: {'python' in words}")
