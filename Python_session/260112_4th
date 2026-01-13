@@ -1,1 +1,165 @@
 
+# 심화문제
+# 문제 1
+
+students = {
+    "민수": [80, 70, 90],
+    "영희": [40, 55, 60],
+    "지수": [100, 95, 90],
+    "철수": [30, 45, 20]
+}
+
+def average(scores):
+  try:
+    res = sum(scores) / len(scores)
+    return res
+  except ZeroDivisionError:
+    print("0으로 나눌 수 없습니다.")
+
+
+def sixty(dctn):
+  newdict = {}
+  for student, score in dctn.items():
+      if score >= 60:
+          newdict[student] = score
+  return newdict 
+
+def highest(dctn):
+  maxscore = 0
+  maxstudent = ""
+  for student in dctn:
+      temp = dctn.get(student,0)
+      if maxscore < temp:
+          maxstudent = student
+          maxscore = temp
+  return maxstudent
+
+def highest(dctn):
+  return max(dctn, key=dctn.get)
+
+avgdict = {student:round(average(students[student]),2) for student in students}
+
+
+print(f"학생별 평균: {avgdict}")
+
+score_sixty = sixty(avgdict)
+print(f"합격자: {score_sixty}")
+
+highest_student = highest(avgdict)
+print(f"최고 평균 학생: {highest_student}")
+
+
+# 문제 2
+accounts = {
+    "A001": 50000,
+    "A002": 120000,
+    "A003": 30000
+}
+
+def deposit(accdict, acc, money):
+    if acc in accdict:
+      accdict[acc] += money
+      print(f"{acc} 잔액: {accdict.get(acc)}")
+  
+def withdrawal(accdict, acc, money):
+    if acc in accdict:
+      temp = accdict.get(acc,0)
+      if money > temp:
+          print(f"{acc} 출금 실패")
+      else:
+          accdict[acc] -= money
+          print(f"{acc} 잔액: {accdict.get(acc)}")
+
+def whole(accdict):
+    return sum(accdict.values())
+  
+def danger(accdict):
+    dndict = [acc for acc, money in accdict.items() if money < 50000]
+    return dndict
+  
+deposit(accounts,"A001",20000)
+withdrawal(accounts, "A003", 50000)
+res = whole(accounts)
+print(f"전체 은행 자산: {res}")
+res = danger(accounts)
+print(f"위험 계좌: {res}")
+
+
+# 문제 3
+log = "error login success login error logout success login error"
+
+from collections import defaultdict
+
+def frequency(s):
+  s = s.lower()
+  words = s.split()
+  freqdict = defaultdict(int)
+  for w in words:
+      freqdict[w] += 1
+  return freqdict
+
+def mostfreq(freqdict):
+  freq = 0
+  freqword = ""
+  for w, c in freqdict.items():
+    if c > freq:
+      freq = c
+      freqword = w
+  return freqword
+
+def mostfreq2(freqdict):
+    return max(freqdict, key=freqdict.get)
+
+def calculate_ratio(freqdict, word):
+    total = sum(freqdict.values())
+    if total == 0: return -1
+
+    freq = freqdict.get(word,0)
+    return round(freq / total * 100,2)
+
+def twotimes(freqdict):
+    newdict = {w:c for w,c in freqdict.items() if c>=2}
+    return newdict
+
+result = dict(frequency(log))
+print(f"단어 빈도: {result}")
+result1 = mostfreq(result)
+
+
+# 문제 4
+""" 이 코드가 문제에서 제공한 코드고,
+ 수정한 코드가 아래 주석 이후 부분임
+scores = []
+
+def add_score(data, x):
+    data = data + [x]
+
+def process():
+    for i in range(3):
+        add_score(scores, i * 10)
+
+process()
+print(scores)
+"""
+scores = []
+
+def add_score(cur, bonus):
+    cur.append(bonus)
+
+def process(score):
+    for i in range(3):
+        add_score(score, i * 10)
+    return score
+
+result = process(scores)
+print(result)
+
+
+print(f"최다 단어: {result1}")
+result2 = calculate_ratio(result,result1)
+if result2 == -1:
+          print("0으로 나눌 수 없습니다.")
+else:
+          print(f"{result1} 비율: {result2}%")
+result3 = twotimes(result)
+print(f"중요 단어: {result3}")
