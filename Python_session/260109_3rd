@@ -1,0 +1,360 @@
+# 심화문제
+# 문제 1
+a = [1, 2, 3] # 리스트 mutable
+b = a
+print(id(a),id(b))
+a += [4]
+print(a, b) # [1,2,3,4], [1,2,3,4]
+print(id(a),id(b)) # 주소값 그대로
+
+a = [1, 2, 3]
+b = a
+print(id(a),id(b))
+a = a + [4]
+print(a, b) # [1,2,3,4], [1,2,3]
+print(id(a),id(b)) # a는 주소값 달라짐
+
+# 문제 2
+x = [1, 2, 3]
+y = x[:]
+print(id(x),id(y)) # 서로 다른 주소값
+x[0] = 99 # x 자체는 주소값 그대로
+print(x, y) # [99,2,3],[1,2,3]
+print(id(x),id(y)) # 서로 다른 채로 유지
+
+p = [1, 2, [3, 4]]
+q = p[:]
+print(id(p),id(q)) # 주소값 서로 다름
+print(id(p[2]),id(p[2][0])) # but 안의 내용의 주소는 같음
+print(id(q[2]),id(q[2][0]))
+p[2][0] = 999
+print(p, q) # [1,2,[999,4]],[1,2,[999,4]]
+print(id(p),id(q)) # 주소값 서로 다른 채로 유지
+
+# 문제 3
+t = (1, 2, [3, 4]) # 튜플 안에 리스트 포함
+t[2].append(5)
+print(t) # (1, 2, [3, 4, 5])
+
+# 아래 줄이 실행된다면 어떤 일이 일어나는지(출력/에러 포함) 정확히 쓰세요.
+# t[2] += [6] # TypeError: 'tuple' object does not support item assignment
+
+
+# 문제 4
+
+# 슬라이스 할당
+lst = [0, 1, 2, 3, 4]
+lst[1:4] = (9, 8)
+print(lst) # [0,9,8,4]
+
+lst = [0, 1, 2, 3, 4]
+lst[1:4] = [9, 8]
+print(lst) # [0,9,8,4]
+
+
+# 단일 인덱스 할당
+lst = [0, 1, 2, 3, 4]
+lst[1] = (9,8)
+print(lst) # [0, (9, 8), 2, 3, 4]
+
+
+# 문제 5
+a = [1, 2, 3, 4]
+a[1:3] = "XY"
+print(a) # [1,'X','Y',4]
+
+b = (1, 2, 3, 4)
+# 아래 줄이 실행된다면 어떤 일이 일어나는지(출력/에러 포함) 정확히 쓰세요.
+# b[1:3] = "XY"
+# 튜플은 변경 불가능하므로 에러 발생
+# TypeError: 'tuple' object does not support item assignment
+
+
+# 문제 6
+d = {1: "one", True: "TRUE", 1.0: "float"}
+print(hash(1),hash(True),hash(1.0)) # 모두 1
+print(d) # {1:"float"}
+print(len(d)) # 1
+print(d[1], d[True], d[1.0]) # float float float
+
+
+# 문제 7
+d = {}
+# d[[1, 2]] = "a"  # 오류 발생
+# TypeError: unhashable type: 'list'
+print(d)
+
+
+# 문제 8
+a = {}
+# a[(1, 2, [3])] = "x" # 오류 발생함
+print(a) # TypeError: unhashable type: 'list'
+
+
+# 문제 9
+d = {"a": 1, "b": 2, "c": 3}
+k = d.keys()
+d["d"] = 4
+print(list(k)) # {"a","b","c"}
+
+# 아래 줄이 실행된다면 어떤 일이 일어나는지(출력/에러 포함) 정확히 쓰세요.
+# for key in d:
+#    d[key + "_x"] = d[key] # 새로운 키-값 쌍이 추가 되면서 딕셔너리 크기가 변함
+# RuntimeError: dictionary changed size during iteration
+
+
+# 문제 10
+d1 = {"x": [1, 2], "y": [3, 4]}
+d2 = d1.copy()
+d1["x"].append(999)
+print(d1) # {"x": [1, 2, 999], "y": [3, 4]}
+print(d2) # {"x": [1, 2, 999], "y": [3, 4]}
+print(id(d1["x"]),id(d2["x"])) # 같음
+
+d3 = {"x": (1, 2), "y": (3, 4)}
+d4 = d3.copy()
+d3["x"] += (999,) # 새로운 튜플 할당
+print(d3) # {'x': (1, 2, 999), 'y': (3, 4)}
+print(d4) # {'x': (1, 2), 'y': (3, 4)}
+print(id(d3["x"]),id(d4["x"])) # 다름
+
+
+# 문제 11
+from collections import defaultdict
+
+logs = [
+    ("u01", "FAIL"), ("u02", "OK"),   ("u01", "FAIL"), ("u03", "FAIL"),
+    ("u01", "OK"),   ("u02", "FAIL"), ("u02", "FAIL"), ("u02", "FAIL"),
+    ("u03", "OK"),   ("u03", "FAIL"), ("u03", "FAIL"), ("u04", "FAIL"),
+    ("u04", "FAIL"), ("u04", "FAIL"), ("u04", "OK"),   ("u01", "FAIL"),
+    ("u05", "OK"),   ("u05", "OK"),   ("u05", "FAIL"), ("u06", "FAIL"),
+    ("u06", "FAIL"), ("u06", "FAIL"), ("u06", "FAIL"), ("u06", "OK"),
+]
+
+lock_threshold = 3
+
+# TODO 1: attempts_by_user에 user_id가 없으면 [0,0,0]으로 초기화
+attempts_by_user = defaultdict(lambda: [0,0,0])
+locked_users = set() # 중복 방지를 위해 리스트가 아닌 set 사용 (0(1) 접근)
+
+for user_id, status in logs:
+    # TODO 2: 총시도/성공/실패 카운트 업데이트
+    stats = attempts_by_user[user_id]
+    stats[0] += 1 # 총 시도 증가
+    if status == "OK": #   - status == "OK"면 성공
+        stats[1] += 1
+    else: #   - status == "FAIL"면 실패
+        stats[2] += 1
+    # TODO 3: 실패 횟수가 lock_threshold 이상이면 locked_users에 추가(중복 없이)
+        if stats[2] >= lock_threshold:
+            locked_users.add(user_id)
+
+# TODO 4: 사용자 id 오름차순으로 (user_id, attempts_by_user[user_id]) 튜플 리스트 만들기
+sorted_summary = sorted(attempts_by_user.items())
+
+print(sorted_summary)
+print(sorted(locked_users))
+
+
+# 문제 12
+price_table = {
+    "A100": 12000,
+    "B200": 3500,
+    "C300": 19900,
+    "D400": 55000,
+    "E500": 9900,
+}
+
+coupon_rules = {
+    "A100": 10,   # 10% off
+    "C300": 15,
+    "E500": 5,
+}
+
+shipping_policy = {
+    "fee": 3000,
+    "free_over": 50000,
+}
+
+items = [("A100", 2), ("B200", 5), ("C300", 1), ("E500", 3)]
+
+invoice = {"lines": []}
+
+subtotal_after_discount = 0
+
+
+# Decimal 은 금융 계산의 표준임!!!
+from decimal import Decimal, ROUND_HALF_UP
+
+for code, qty in items:
+    # TODO 1: unit_price 가져오기
+    unit_price = price_table[code]
+
+    # TODO 2: line_subtotal 계산 (unit_price * qty)
+    line_subtotal = unit_price * qty
+
+    # TODO 3: discount_rate 가져오기 (없으면 0)
+    discount_rate = coupon_rules.get(code,0)
+
+    # TODO 4: line_total 계산 (정률할인 적용 후 정수 원 단위로 반올림/버림 없이 정확히 계산)
+    # 아래는 소수점 발생 시 반올림 처리를 명시한 버전
+    line_total = int(Decimal(line_subtotal * (100-discount_rate) / 100).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+
+    # TODO 5: invoice["lines"]에 튜플 추가
+    invoice["lines"].append((code, qty, unit_price, line_subtotal, discount_rate, line_total))
+
+    # TODO 6: subtotal_after_discount 누적
+    subtotal_after_discount += line_total
+
+# TODO 7: 배송비 계산
+shipping_fee = 0 if subtotal_after_discount >= shipping_policy["free_over"] else shipping_policy["fee"]
+
+# TODO 8: grand_total 계산 및 invoice에 저장
+invoice.update({"subtotal_after_discount" : subtotal_after_discount,
+                "shipping_fee" : shipping_fee,
+                "grand_total" : subtotal_after_discount + shipping_fee})
+
+import pprint
+pprint.pprint(invoice)
+
+
+# 문제 13
+inventory = {
+    "apple": 10,
+    "banana": 6,
+    "milk": 4,
+    "bread": 3,
+    "egg": 12
+}
+
+orders = [
+    ("o001", [("apple", 3), ("milk", 1)]),
+    ("o002", [("banana", 2), ("bread", 2)]),
+    ("o003", [("egg", 6), ("milk", 2)]),
+    ("o004", [("apple", 8)]),
+    ("o005", [("banana", 5)]),
+    ("o006", [("egg", 7), ("bread", 2)]),
+    ("o007", [("milk", 1), ("bread", 1)]),
+]
+
+accepted = []
+rejected = []
+
+for order_id, lines in orders:
+    # TODO 1: 이번 주문이 가능한지 여부(can_fulfill)를 계산
+    #  - 모든 품목이 재고 이상이어야 가능
+    for item, qty in lines:
+        if inventory.get(item,0) >= qty:
+            can_fulfill = True
+        else:
+            can_fulfill = False
+            break
+
+    # TODO 2: can_fulfill이 True면
+    if can_fulfill:
+        accepted.append(order_id)
+        for item, qty in lines:
+            inventory[item] -= qty
+    #  - accepted에 order_id 추가
+    #  - inventory 차감
+    # can_fulfill이 False면
+    else:
+        rejected.append(order_id)
+    #  - rejected에 order_id 추가
+    pass
+
+print("accepted:", accepted)
+print("rejected:", rejected)
+print("inventory:", inventory)
+
+
+# 문제 14
+sessions = [
+    ("s01", "u01", 1700),
+    ("s02", "u01", 1750),
+    ("s03", "u02", 1600),
+    ("s04", "u03", 1900),
+    ("s05", "u02", 1650),
+    ("s06", "u04", 1200),
+    ("s07", "u04", 2100),
+    ("s08", "u05", 1300),
+    ("s09", "u05", 1299),
+    ("s10", "u06", 2200),
+    ("s11", "u06", 2199),
+]
+
+expire_before = 1500
+
+active_sessions = {}
+expired_sessions = []
+
+for session_id, user_id, last_seen in sessions:
+    # TODO 1: 만료 세션이면 expired_sessions에 추가하고 다음으로
+    if last_seen < expire_before:
+        expired_sessions.append(session_id)
+    # TODO 2: 만료가 아니면 active_sessions에서 user_id 기준으로 최신 세션만 유지
+    else:
+        if user_id in active_sessions: # 이미 저장된 값이 있다면
+            old_sid, old_last_seen = active_sessions[user_id]
+            if last_seen>=old_last_seen: # 현재 보는 값이 저장된 값보다 더 최신이라면
+                expired_sessions.append(old_sid)
+                active_sessions[user_id] = (session_id, last_seen)
+            else:
+                expired_sessions.append(session_id)
+        else: # 이미 저장된 값이 없다면 새로 등록
+            active_sessions[user_id] = (session_id, last_seen)
+    #   - user_id가 없으면 등록
+    #   - 있으면 last_seen 비교 후 더 최신이면 교체
+
+print(active_sessions)
+print(sorted(expired_sessions))
+
+
+# 문제 15
+sales_logs = [
+    ("S1", "coffee",  4500),
+    ("S1", "dessert", 7000),
+    ("S1", "coffee",  3000),
+    ("S2", "coffee",  8000),
+    ("S2", "meal",    12000),
+    ("S2", "dessert", 12000),
+    ("S3", "meal",    5000),
+    ("S3", "coffee",  5000),
+    ("S3", "meal",    5000),
+    ("S1", "meal",    9000),
+    ("S2", "coffee",  2000),
+    ("S3", "dessert", 1000),
+    ("S3", "dessert", 4000),
+    ("S1", "dessert", 2000),
+    ("S2", "meal",    1000),
+    ("S2", "dessert", 1000),
+    ("S1", "coffee",  2500),
+    ("S1", "meal",    1000),
+    ("S3", "coffee",  2000),
+    ("S2", "coffee",  3000),
+    ("S3", "meal",    2000),
+]
+
+# sales_by_store = {}
+from collections import defaultdict
+sales_by_store = defaultdict(lambda: defaultdict(int))
+top_category_by_store = {}
+
+for store, category, amount in sales_logs:
+    # TODO 1: sales_by_store 중첩 딕셔너리 누적
+    sales_by_store[store][category] += amount
+    """sales_by_store['S1']에 접근할 때
+    'S1'이 없으면, 바깥쪽 defaultdict가 lambda를 실행해
+    새로운 defaultdict(int)를 생성함
+
+    거기에 바로 ['coffee']로 접근하면, 안쪽 defaultdict가 int()를 실행해
+    0을 생성함 """
+
+# TODO 2: top_category_by_store 계산
+#  - store별로 category 합계를 보고 Top-1을 고르기
+#  - 동률이면 category 사전순이 앞선 것 선택
+for store, lines in sales_by_store.items():
+      top_category_by_store[store] = sorted(lines.items(), key=lambda x: (-x[1], x[0]))[0]
+
+print(sales_by_store)
+print(top_category_by_store)
