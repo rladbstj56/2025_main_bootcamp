@@ -7,10 +7,10 @@ class Point:
   def move(self,dx,dy):
     self.x += dx
     self.y += dy
+    return self
 
   def show(self):
     print(f"Point({self.x}, {self.y})")
   
 p = Point(1,2)
-p.move(2,3)
-p.show()
+p.move(2,3).show()
