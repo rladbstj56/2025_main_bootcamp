@@ -14,3 +14,43 @@ class Point:
   
 p = Point(1,2)
 p.move(2,3).show()
+
+
+# 실습 문제 2
+class Counter:
+  count = 0
+  
+  def __init__(self):
+    Counter.count += 1
+  
+  @classmethod
+  def how_many(cls):
+    print(f"현재까지 {cls.count}개 생성")
+  
+a = Counter()
+b = Counter()
+c = Counter()
+Counter.how_many()
+
+
+# 실습 문제 3
+class Temperature:
+  def __init__(self,celsius):
+    self.celsius = celsius
+  
+  def to_fahrenheit(self):
+    return self.celsius * 9 / 5 + 32
+  
+  def is_boiling(self):
+    if self.celsius >= 100:
+      return True
+    else:
+      return False
+    
+t = Temperature(36.5)
+print(t.to_fahrenheit())
+print(t.is_boiling())
+
+t2 = Temperature(120)
+print(t2.to_fahrenheit())
+print(t2.is_boiling())
