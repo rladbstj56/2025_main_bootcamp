@@ -54,3 +54,100 @@ print(t.is_boiling())
 t2 = Temperature(120)
 print(t2.to_fahrenheit())
 print(t2.is_boiling())
+
+
+# 연습문제 1
+
+class Student:
+  def __init__(self, name, age):
+    if not isinstance(age, int):
+      raise TypeError("나이는 정수여야 합니다.")
+    self.name = name
+    self.age = age
+
+  def print_info(self):
+    print(f"이름: {self.name}, 나이: {self.age}")
+
+minsu = Student("민수",15)
+minsu.print_info()
+
+
+# 연습문제 2
+
+class Rectangle:
+  def __init__(self, width, height):
+    if not (isinstance(width, int) and isinstance(height, int)):
+      raise TypeError("가로와 세로는 정수여야 합니다.")
+
+    if width <= 0 or height <= 0:
+      raise ValueError
+
+    self.__width = width
+    self.__height = height
+
+  def get_area(self):
+    return self.__width * self.__height
+
+rect = Rectangle(5,3)
+print(f"넓이 : {rect.get_area()}")
+
+
+# 연습문제 3
+
+class Dog:
+    def __init__(self, name: str, age: int):
+      if not isinstance(age,int):
+        raise TypeError("나이는 정수만 입력해야합니다.")
+      if age <= 0:
+        raise ValueError(f"나이는 0보다 커야합니다. 입력값: {age}")
+
+      self.name = name
+      self.age = age
+
+dog = Dog("초코", 3)
+print(dog.name)
+
+
+# 연습문제 6
+
+class Score:
+    total = 0
+
+    def __init__(self, value):
+        self.value = value # value는 인스턴스 변수
+        Score.total += value # total은 클래스 변수
+
+    def add(self, x):
+        self.value += x 
+        Score.total += x
+
+a = Score(10) # a.value = 10, Score.total = 10
+b = Score(20) # b.value = 20, Score.total = 30
+
+a.add(5) # a.value = 15, Score.total = 35
+b.add(3) # b.value = 23, Score.total = 38
+
+print(a.value) # 15
+print(b.value) # 23
+print(Score.total) # 38
+
+# 연습문제 7
+
+class Student:
+    def __init__(self, initial_scores=None):
+      if initial_scores is None:
+        self.scores = []
+      else:
+        self.scores = list(initial_scores)
+
+    def add_score(self, score):
+        self.scores.append(score)
+
+s1 = Student([90,80,70])
+s2 = Student()
+
+s1.add_score(90) # s1.scores = [90, 80, 70, 90]
+s2.add_score(80) # s2.scores = [80]
+
+print(s1.scores)
+print(s2.scores)
