@@ -16,3 +16,6 @@ lib/
 __pycache__/
 *.py[cod]
 .DS_Store
+
+# 무아튜터님 깃허브 연결된 파일
+statistics-practice-python/
