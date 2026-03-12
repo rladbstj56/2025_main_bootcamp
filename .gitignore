@@ -21,3 +21,11 @@ __pycache__/
 statistics-practice-python/
 
 vscode-python-setup-guide/
+*.csv
+*.zip
+*.xlsx
+*.csv
+*.zip
+*.xlsx
+*.json
+.DS_Store
